@@ -1,0 +1,7 @@
+apache-airflow==2.10.4
+pyspark==3.5.4
+serpapi==0.1.5
+pandas==2.2.3
+python-dotenv==1.0.1
+psycopg2-binary==2.9.10
+google-search-results==2.4.2

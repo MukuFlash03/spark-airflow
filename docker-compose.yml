@@ -1,0 +1,35 @@
+services:
+    postgres:
+        image: postgres:13
+        env_file:
+            - .env
+        ports:
+            - "5432:5432"
+        volumes:
+            - ./postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD", "pg_isready", "-U", "airflow"]
+            interval: 5s
+            retries: 5
+
+    airflow:
+        build: .
+        depends_on:
+            postgres:
+                condition: service_healthy
+        env_file:
+            - .env
+        environment:
+            - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
+            - AIRFLOW_HOME=/opt/airflow
+            - SPARK_HOME=/opt/spark
+            - JAVA_HOME=/usr/lib/jvm/java-17-openjdk-arm64
+            - PATH=/opt/spark/bin:/opt/spark/sbin:/home/airflow/.local/bin:${PATH}
+            - PYTHONPATH=/opt/spark/python:/opt/spark/python/lib/py4j-0.10.9.7-src.zip:${PYTHONPATH}
+            - AIRFLOW__CORE__LOAD_EXAMPLES=False
+        volumes:
+            - ./dags:/opt/airflow/dags
+            - ./scripts:/opt/airflow/scripts
+            - ./data:/opt/airflow/data
+        ports:
+            - "8080:8080"
